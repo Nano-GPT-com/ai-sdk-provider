@@ -1,0 +1,63 @@
+---
+title: NanoGPT
+description: NanoGPT Provider for the Vercel AI SDK
+---
+
+# NanoGPT
+
+[NanoGPT](https://nano-gpt.com) delivers lightweight, efficient language models designed for production workloads. This community provider brings NanoGPT support to the [Vercel AI SDK](https://ai-sdk.dev) so you can reuse the same abstractions across providers.
+
+> **Note:** The implementation is currently under active development. Follow the repository for updates and final API surface details.
+
+## Setup
+
+The provider will be available from the `@nanogpt/ai-sdk-provider` package once the initial release is cut:
+
+<Tabs items={['pnpm', 'npm', 'yarn', 'bun']}>
+  <Tab>
+    <Snippet text="pnpm add @nanogpt/ai-sdk-provider" dark />
+  </Tab>
+  <Tab>
+    <Snippet text="npm install @nanogpt/ai-sdk-provider" dark />
+  </Tab>
+  <Tab>
+    <Snippet text="yarn add @nanogpt/ai-sdk-provider" dark />
+  </Tab>
+  <Tab>
+    <Snippet text="bun add @nanogpt/ai-sdk-provider" dark />
+  </Tab>
+</Tabs>
+
+## Provider Instance
+
+```typescript
+import { createNanoGPT } from '@nanogpt/ai-sdk-provider';
+
+const nanogpt = createNanoGPT({
+  apiKey: process.env.NANOGPT_API_KEY!,
+});
+```
+
+You can generate an API key from the [NanoGPT dashboard](https://nano-gpt.com/dashboard) (URL TBC).
+
+## Model Usage
+
+```typescript
+import { generateText } from 'ai';
+import { createNanoGPT } from '@nanogpt/ai-sdk-provider';
+
+const nanogpt = createNanoGPT({ apiKey: process.env.NANOGPT_API_KEY! });
+
+const { text } = await generateText({
+  model: nanogpt.chat('nanogpt/chat-v1'),
+  prompt: 'Summarize the NanoGPT mission statement.',
+});
+```
+
+Streaming support, embeddings, and tool-calling examples will be documented here once the endpoints are finalized.
+
+## Resources
+
+- [Repository](https://github.com/Nano-GPT-com/ai-sdk-provider)
+- [NanoGPT Documentation](https://docs.nano-gpt.com)
+- [Vercel AI SDK](https://ai-sdk.dev)
