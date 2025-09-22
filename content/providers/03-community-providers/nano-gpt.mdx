@@ -1,0 +1,60 @@
+---
+title: NanoGPT
+description: NanoGPT Provider for the Vercel AI SDK
+---
+
+# NanoGPT
+
+[NanoGPT](https://nano-gpt.com) delivers lightweight, efficient language models designed for production workloads. This community provider brings NanoGPT support to the [Vercel AI SDK](https://ai-sdk.dev) so you can reuse the same abstractions across providers.
+
+## Install
+
+<Tabs items={['pnpm', 'npm', 'yarn', 'bun']}>
+  <Tab>
+    <Snippet text="pnpm add @nanogpt/ai-sdk-provider" dark />
+  </Tab>
+  <Tab>
+    <Snippet text="npm install @nanogpt/ai-sdk-provider" dark />
+  </Tab>
+  <Tab>
+    <Snippet text="yarn add @nanogpt/ai-sdk-provider" dark />
+  </Tab>
+  <Tab>
+    <Snippet text="bun add @nanogpt/ai-sdk-provider" dark />
+  </Tab>
+</Tabs>
+
+## Usage
+
+```tsx
+import { generateText, embedMany } from 'ai'
+import { createNanoGPT } from '@nanogpt/ai-sdk-provider'
+
+const nanogpt = createNanoGPT({
+  apiKey: process.env.NANOGPT_API_KEY!,
+})
+
+const { text } = await generateText({
+  model: nanogpt.languageModel('gpt-5'),
+  prompt: 'Summarise the latest NanoGPT release notes.',
+})
+
+const { embeddings } = await embedMany({
+  model: nanogpt.textEmbeddingModel('text-embedding-3-small'),
+  values: ['NanoGPT is fast.', 'NanoGPT is private.'],
+})
+```
+
+## Capabilities
+
+- Chat completions with streaming, JSON mode, tool calls, and NanoGPT billing metadata passthrough.
+- Text embeddings with automatic base64 decoding, usage reporting, and batching up to 2048 inputs.
+- Request retries, timeouts, and abort signals mapped to `NanoGPTRequestError` instances.
+
+_Image generation via `/v1/images/generations` is on the roadmap. Call the endpoint directly or watch the package changelog for updates._
+
+## Resources
+
+- [Repository](https://github.com/Nano-GPT-com/ai-sdk-provider)
+- [NanoGPT Documentation](https://docs.nano-gpt.com)
+- [Vercel AI SDK](https://ai-sdk.dev)

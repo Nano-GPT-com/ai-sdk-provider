@@ -1,0 +1,16 @@
+{
+  "name": "simple-consumer",
+  "version": "1.0.0",
+  "main": "index.mjs",
+  "scripts": {
+    "start": "node index.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@nanogpt/ai-sdk-provider": "file:../.."
+  },
+  "type": "module"
+}
