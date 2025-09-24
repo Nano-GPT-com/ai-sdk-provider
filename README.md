@@ -94,11 +94,8 @@ await embedMany({
 
 ## Release checklist
 
-1. `npm run lint && npm run type-check`
-2. `npm run test`
-3. `npm run build`
-4. Update `CHANGELOG.md`
-5. `npm publish --access public`
+- Run `npm run release <bump>` (e.g. `patch`, `minor`, `major`, or an explicit version). The script checks for a clean git state, runs lint/type-check/test/build, bumps the package via `npm version`, publishes with `npm publish --access public`, and pushes commits + tags.
+- For pre-release dist-tags, append npm publish flags after `--`: `npm run release prerelease -- --tag next`.
 
 ## Documentation
 

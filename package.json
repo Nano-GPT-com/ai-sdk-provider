@@ -1,6 +1,6 @@
 {
   "name": "@nanogpt/ai-sdk-provider",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "NanoGPT community provider for the Vercel AI SDK.",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -25,7 +25,8 @@
     "test:watch": "vitest watch",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "release": "node ./scripts/release.mjs"
   },
   "engines": {
     "node": ">=18.17.0"
