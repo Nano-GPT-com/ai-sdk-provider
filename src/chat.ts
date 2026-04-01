@@ -2,15 +2,15 @@ import {
   InvalidResponseDataError,
   NoContentGeneratedError,
   UnsupportedFunctionalityError,
-  type JSONValue,
-  type LanguageModelV2,
-  type LanguageModelV2CallOptions,
-  type LanguageModelV2Content,
-  type LanguageModelV2FinishReason,
-  type LanguageModelV2Prompt,
-  type LanguageModelV2StreamPart,
-  type LanguageModelV2Usage,
-  type SharedV2ProviderMetadata,
+  type JSONObject,
+  type LanguageModelV3,
+  type LanguageModelV3CallOptions,
+  type LanguageModelV3Content,
+  type LanguageModelV3FinishReason,
+  type LanguageModelV3Prompt,
+  type LanguageModelV3StreamPart,
+  type LanguageModelV3Usage,
+  type SharedV3ProviderMetadata,
 } from '@ai-sdk/provider'
 import { createIdGenerator } from '@ai-sdk/provider-utils'
 
@@ -58,12 +58,18 @@ interface BuildRequestResult {
   headers?: HeadersInit
 }
 
-const DEFAULT_USAGE: LanguageModelV2Usage = {
-  inputTokens: undefined,
-  outputTokens: undefined,
-  totalTokens: undefined,
-  reasoningTokens: undefined,
-  cachedInputTokens: undefined,
+const DEFAULT_USAGE: LanguageModelV3Usage = {
+  inputTokens: {
+    total: undefined,
+    noCache: undefined,
+    cacheRead: undefined,
+    cacheWrite: undefined,
+  },
+  outputTokens: {
+    total: undefined,
+    text: undefined,
+    reasoning: undefined,
+  },
 }
 
 const TEXT_STREAM_ID_PREFIX = 'nanogpt-text'
@@ -71,11 +77,11 @@ const TEXT_STREAM_ID_PREFIX = 'nanogpt-text'
 export function createNanoGPTChatModel(
   client: NanoGPTClient,
   modelId: NanoGPTModelId,
-): LanguageModelV2 {
+): LanguageModelV3 {
   const textIdGenerator = createIdGenerator({ prefix: TEXT_STREAM_ID_PREFIX })
 
   return {
-    specificationVersion: 'v2',
+    specificationVersion: 'v3',
     provider: 'nanogpt',
     modelId,
     supportedUrls: {},
@@ -143,7 +149,7 @@ export function createNanoGPTChatModel(
 }
 
 function buildRequest(
-  options: LanguageModelV2CallOptions & { modelId: NanoGPTModelId },
+  options: LanguageModelV3CallOptions & { modelId: NanoGPTModelId },
   stream: boolean,
 ): BuildRequestResult {
   const messages = convertPrompt(options.prompt)
@@ -186,7 +192,7 @@ function buildRequest(
   }
 }
 
-function convertPrompt(prompt: LanguageModelV2Prompt): Array<Record<string, unknown>> {
+function convertPrompt(prompt: LanguageModelV3Prompt): Array<Record<string, unknown>> {
   return prompt.map((message) => {
     switch (message.role) {
       case 'system':
@@ -221,7 +227,7 @@ function collectText(
     .join('')
 }
 
-function convertTools(tools: LanguageModelV2CallOptions['tools']): Array<Record<string, unknown>> {
+function convertTools(tools: LanguageModelV3CallOptions['tools']): Array<Record<string, unknown>> {
   if (!tools) return []
 
   return tools.map((tool) => {
@@ -243,7 +249,7 @@ function convertTools(tools: LanguageModelV2CallOptions['tools']): Array<Record<
   })
 }
 
-function convertToolChoice(choice: NonNullable<LanguageModelV2CallOptions['toolChoice']>): unknown {
+function convertToolChoice(choice: NonNullable<LanguageModelV3CallOptions['toolChoice']>): unknown {
   switch (choice.type) {
     case 'auto':
     case 'none':
@@ -259,43 +265,47 @@ function convertToolChoice(choice: NonNullable<LanguageModelV2CallOptions['toolC
   }
 }
 
-function mapFinishReason(reason: string | null | undefined): LanguageModelV2FinishReason {
+function mapFinishReason(reason: string | null | undefined): LanguageModelV3FinishReason {
   switch (reason) {
     case 'stop':
-      return 'stop'
+      return { unified: 'stop', raw: 'stop' }
     case 'length':
-      return 'length'
+      return { unified: 'length', raw: 'length' }
     case 'content_filter':
-      return 'content-filter'
+      return { unified: 'content-filter', raw: 'content_filter' }
     case 'tool_calls':
+      return { unified: 'tool-calls', raw: 'tool_calls' }
     case 'tool_call':
+      return { unified: 'tool-calls', raw: 'tool_call' }
     case 'function_call':
-      return 'tool-calls'
+      return { unified: 'tool-calls', raw: 'function_call' }
     case 'error':
-      return 'error'
+      return { unified: 'error', raw: 'error' }
     case undefined:
     case null:
-      return 'unknown'
+      return { unified: 'other', raw: undefined }
     default:
-      return 'other'
+      return { unified: 'other', raw: reason }
   }
 }
 
-function mapUsage(payload?: NanoGPTUsagePayload | null): LanguageModelV2Usage {
-  if (!payload) {
-    return { ...DEFAULT_USAGE }
-  }
-
+function mapUsage(payload?: NanoGPTUsagePayload | null): LanguageModelV3Usage {
   return {
-    inputTokens: payload.prompt_tokens,
-    outputTokens: payload.completion_tokens,
-    totalTokens: payload.total_tokens,
-    reasoningTokens: payload.reasoning_tokens,
-    cachedInputTokens: payload.cached_tokens,
+    inputTokens: {
+      total: payload?.prompt_tokens,
+      noCache: undefined,
+      cacheRead: payload?.cached_tokens,
+      cacheWrite: undefined,
+    },
+    outputTokens: {
+      total: payload?.completion_tokens,
+      text: undefined,
+      reasoning: payload?.reasoning_tokens,
+    },
   }
 }
 
-function toLanguageModelContent(text: string): LanguageModelV2Content[] {
+function toLanguageModelContent(text: string): LanguageModelV3Content[] {
   return [
     {
       type: 'text',
@@ -313,18 +323,18 @@ function sanitizeHeaders(headers?: Record<string, string | undefined>): HeadersI
   return entries.length ? Object.fromEntries(entries) : undefined
 }
 
-function toProviderMetadata(value: unknown): SharedV2ProviderMetadata | undefined {
+function toProviderMetadata(value: unknown): SharedV3ProviderMetadata | undefined {
   if (!value || typeof value !== 'object') {
     return undefined
   }
 
-  return { nanogpt: value as Record<string, JSONValue> } as SharedV2ProviderMetadata
+  return { nanogpt: value as JSONObject }
 }
 
 function createStreamFromResponse(
   response: Response,
   options: { includeRawChunks?: boolean; textId: string },
-): ReadableStream<LanguageModelV2StreamPart> {
+): ReadableStream<LanguageModelV3StreamPart> {
   const body = response.body
   if (!body) {
     throw new InvalidResponseDataError({
@@ -336,7 +346,7 @@ function createStreamFromResponse(
   const decoder = new TextDecoder()
   const reader = body.getReader()
 
-  return new ReadableStream<LanguageModelV2StreamPart>({
+  return new ReadableStream<LanguageModelV3StreamPart>({
     start(controller) {
       controller.enqueue({ type: 'stream-start', warnings: [] })
 
@@ -344,9 +354,9 @@ function createStreamFromResponse(
       let buffer = ''
       let finished = false
       let textOpen = false
-      let finishReason: LanguageModelV2FinishReason = 'unknown'
-      let usage: LanguageModelV2Usage = { ...DEFAULT_USAGE }
-      let providerMetadata: SharedV2ProviderMetadata | undefined
+      let finishReason: LanguageModelV3FinishReason = { unified: 'other', raw: undefined }
+      let usage: LanguageModelV3Usage = { inputTokens: { ...DEFAULT_USAGE.inputTokens }, outputTokens: { ...DEFAULT_USAGE.outputTokens } }
+      let providerMetadata: SharedV3ProviderMetadata | undefined
 
       const emitTextStart = () => {
         if (!textOpen) {

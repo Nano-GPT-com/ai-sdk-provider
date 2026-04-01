@@ -53,7 +53,7 @@ describe('createNanoGPTEmbeddingModel', () => {
     const client = { request: vi.fn() } as unknown as NanoGPTClient
     const model = createNanoGPTEmbeddingModel(client, 'text-embedding-3-small')
 
-    await expect(() =>
+    await expect(
       model.doEmbed({
         values: new Array(2050).fill('x'),
       }),

@@ -1,11 +1,11 @@
-import { NoSuchModelError, type ProviderV2 } from '@ai-sdk/provider';
+import { NoSuchModelError, type ProviderV3 } from '@ai-sdk/provider';
 
 import { createNanoGPTChatModel } from './chat';
 import { NanoGPTClient } from './client';
 import { createNanoGPTEmbeddingModel } from './embeddings';
 import type { NanoGPTProviderOptions } from './types';
 
-export interface NanoGPTProvider extends ProviderV2 {
+export interface NanoGPTProvider extends ProviderV3 {
   readonly client: NanoGPTClient;
 }
 
@@ -16,8 +16,12 @@ export function createNanoGPT(options: NanoGPTProviderOptions): NanoGPTProvider 
 
   return {
     client,
+    specificationVersion: 'v3',
     languageModel(modelId: string) {
       return createNanoGPTChatModel(client, modelId);
+    },
+    embeddingModel(modelId: string) {
+      return createNanoGPTEmbeddingModel(client, modelId);
     },
     textEmbeddingModel(modelId: string) {
       return createNanoGPTEmbeddingModel(client, modelId);

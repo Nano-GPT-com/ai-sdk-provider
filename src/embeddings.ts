@@ -1,9 +1,9 @@
 import {
   InvalidResponseDataError,
   TooManyEmbeddingValuesForCallError,
-  type EmbeddingModelV2,
-  type JSONValue,
-  type SharedV2ProviderMetadata,
+  type EmbeddingModelV3,
+  type JSONObject,
+  type SharedV3ProviderMetadata,
 } from '@ai-sdk/provider'
 
 import type { NanoGPTClient } from './client'
@@ -33,9 +33,9 @@ interface NanoGPTEmbeddingResponse {
 export function createNanoGPTEmbeddingModel(
   client: NanoGPTClient,
   modelId: NanoGPTModelId,
-): EmbeddingModelV2<string> {
+): EmbeddingModelV3 {
   return {
-    specificationVersion: 'v2',
+    specificationVersion: 'v3',
     provider: 'nanogpt',
     modelId,
     maxEmbeddingsPerCall: MAX_EMBEDDINGS_PER_CALL,
@@ -113,12 +113,12 @@ function sanitizeHeaders(headers?: Record<string, string | undefined>): HeadersI
   return entries.length ? Object.fromEntries(entries) : undefined
 }
 
-function toProviderMetadata(value: unknown): SharedV2ProviderMetadata | undefined {
+function toProviderMetadata(value: unknown): SharedV3ProviderMetadata | undefined {
   if (!value || typeof value !== 'object') {
     return undefined
   }
 
-  return { nanogpt: value as Record<string, JSONValue> } as SharedV2ProviderMetadata
+  return { nanogpt: value as JSONObject }
 }
 
 function normalizeEmbedding(embedding: number[] | string, index: number): number[] {
