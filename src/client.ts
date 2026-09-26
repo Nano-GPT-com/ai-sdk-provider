@@ -9,6 +9,7 @@ const RETRYABLE_STATUS = new Set([408, 409, 429, 500, 502, 503, 504]);
 export class NanoGPTClient {
   private readonly apiKey: string;
   private readonly baseURL: string;
+  private readonly baseOrigin: string;
   private readonly defaultHeaders: Record<string, string>;
   private readonly timeoutMs: number;
   private readonly maxRetries: number;
@@ -25,6 +26,7 @@ export class NanoGPTClient {
 
     this.apiKey = options.apiKey;
     this.baseURL = options.baseURL ?? DEFAULT_BASE_URL;
+    this.baseOrigin = new URL(this.baseURL).origin;
     this.defaultHeaders = {
       Accept: 'application/json',
       'Content-Type': 'application/json',
@@ -53,6 +55,7 @@ export class NanoGPTClient {
         const response = await this.fetchImpl(url, {
           ...restInit,
           headers,
+          redirect: 'error',
           signal: controller.signal
         });
 
@@ -131,6 +134,7 @@ export class NanoGPTClient {
       const response = await this.fetchImpl(url, {
         ...restInit,
         headers,
+        redirect: 'error',
         signal: controller.signal
       });
 
@@ -173,11 +177,22 @@ export class NanoGPTClient {
   }
 
   private resolveUrl(path: string): string {
-    if (path.startsWith('http://') || path.startsWith('https://')) {
-      return path;
+    // Preserve the SDK's base-path prefix for relative endpoint paths.
+    const input = path.trim();
+    const url = new URL(
+      /^[a-z][a-z0-9+.-]*:/i.test(input) || input.startsWith('//')
+        ? input
+        : `${this.baseURL.replace(/\/$/, '')}/${input.replace(/^\//, '')}`,
+      this.baseURL
+    );
+    if (url.origin !== this.baseOrigin || !['http:', 'https:'].includes(url.protocol)
+      || url.username || url.password) {
+      throw createNanoGPTRequestError({
+        code: 'invalid_target_origin',
+        message: 'Request URL must match the configured API origin and contain no credentials.'
+      });
     }
-
-    return `${this.baseURL.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
+    return url.toString();
   }
 
   private shouldRetry(status: number | string | undefined, attempt: number): boolean {

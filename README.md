@@ -92,6 +92,12 @@ await embedMany({
 - `npm run lint` – ESLint for `src/`
 - `npm run format` – Prettier across source, configuration, and docs
 
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for unreleased changes.
+
+Authenticated requests stay on the configured `baseURL` origin and reject redirects. Configure the final trusted API or proxy endpoint directly. Custom fetch implementations must honor the Fetch redirect policy.
+
 ## Release checklist
 
 - Run `npm run release <bump>` (e.g. `patch`, `minor`, `major`, or an explicit version). The script checks for a clean git state, runs lint/type-check/test/build, bumps the package via `npm version`, publishes with `npm publish --access public`, and pushes commits + tags.
