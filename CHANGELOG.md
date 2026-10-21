@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.5 — 2026-10-21
+
+- Remove the unused Vercel CLI runtime dependency.
+- Declare the provider interface and JSON Schema types used by public declarations.
+- Refresh development tooling and dependency locks for security fixes.
+- Preserve the AI SDK 5 peer dependency, Node requirement and stream ID behavior.
+- Document the application-level Undici override still needed by AI SDK 5 hosts.
+
 ## 0.1.4 — 2026-09-26
 
 ### Security

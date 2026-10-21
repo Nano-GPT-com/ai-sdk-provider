@@ -318,7 +318,7 @@ function toProviderMetadata(value: unknown): SharedV2ProviderMetadata | undefine
     return undefined
   }
 
-  return { nanogpt: value as Record<string, JSONValue> } as SharedV2ProviderMetadata
+  return { nanogpt: value as Record<string, JSONValue> }
 }
 
 function createStreamFromResponse(

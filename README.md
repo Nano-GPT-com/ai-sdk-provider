@@ -10,6 +10,35 @@ npm install @nanogpt/ai-sdk-provider
 pnpm add @nanogpt/ai-sdk-provider
 ```
 
+### Security updates and the host application
+
+Version 0.1.5 removes the unused Vercel deployment CLI dependency. The public
+provider API, Node requirement and required `ai: ^5.0.0` peer remain unchanged.
+The provider does not require the `vercel` command; applications that use that
+CLI should install it explicitly.
+
+As of October 21, 2026, AI SDK 5.0.279 still resolves Undici 5 through
+`@ai-sdk/provider-utils`. Updating this provider alone does not patch that host
+SDK dependency. For npm applications using AI SDK 5, add this to the application's
+root `package.json`, reinstall dependencies and run its integration tests:
+
+```json
+{
+  "overrides": {
+    "undici": "^6.29.1"
+  }
+}
+```
+
+For pnpm applications, use the equivalent root `pnpm.overrides` setting.
+Overrides in this provider's repository do not propagate to consumer projects.
+The checked-in consumer smoke tests cover text generation, streaming, embeddings
+and forwarding tool definitions against AI SDK 5.0.5 and 5.0.279 with this override.
+Tool-call responses are not surfaced by the provider; this existing limitation
+is unchanged from 0.1.4. The override
+crosses an Undici major version, so applications that use Undici directly or have
+other Undici-dependent integrations must test those integrations separately.
+
 ## Quick start
 
 ```ts

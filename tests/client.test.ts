@@ -31,7 +31,9 @@ for (const method of ['request', 'stream'] as const) {
       const client = new NanoGPTClient({ apiKey: 'synthetic-key', baseURL, fetch: fetchImpl });
       await client[method](path!, { redirect: 'follow' });
       expect(fetchImpl).toHaveBeenCalledTimes(1);
-      const [url, init] = fetchImpl.mock.calls[0];
+      const call = fetchImpl.mock.calls[0];
+      if (!call) throw new Error('Expected fetch call');
+      const [url, init] = call;
       expect(url).toBe(expected);
       expect(init.redirect).toBe('error');
       const headers = new Headers(init.headers);

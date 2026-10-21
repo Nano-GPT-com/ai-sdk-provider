@@ -3,14 +3,19 @@
   "version": "1.0.0",
   "main": "index.mjs",
   "scripts": {
-    "start": "node index.mjs"
+    "start": "node index.mjs",
+    "test": "node --test smoke.test.mjs"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@nanogpt/ai-sdk-provider": "file:../.."
+    "@nanogpt/ai-sdk-provider": "file:../..",
+    "ai": "^5.0.279"
   },
-  "type": "module"
+  "type": "module",
+  "overrides": {
+    "undici": "^6.29.1"
+  }
 }

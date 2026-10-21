@@ -118,7 +118,7 @@ function toProviderMetadata(value: unknown): SharedV2ProviderMetadata | undefine
     return undefined
   }
 
-  return { nanogpt: value as Record<string, JSONValue> } as SharedV2ProviderMetadata
+  return { nanogpt: value as Record<string, JSONValue> }
 }
 
 function normalizeEmbedding(embedding: number[] | string, index: number): number[] {
@@ -128,7 +128,7 @@ function normalizeEmbedding(embedding: number[] | string, index: number): number
 
   try {
     return decodeBase64ToFloat32Array(embedding)
-  } catch (error) {
+  } catch {
     throw new InvalidResponseDataError({
       message: `Embedding at index ${index} is not a valid base64-encoded Float32 array.`,
       data: embedding,
